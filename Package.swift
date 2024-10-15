@@ -4,20 +4,28 @@
 import PackageDescription
 
 let package = Package(
-    name: "ViewModelling",
+    name: "swift-view-modeling",
+    platforms: [
+        .iOS(.v17),
+    ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "ViewModelling",
-            targets: ["ViewModelling"]),
+            name: "ViewModeling",
+            targets: ["ViewModeling"]
+        ),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "ViewModelling"),
+            name: "ViewModeling",
+            path: "Sources"
+        ),
         .testTarget(
-            name: "ViewModellingTests",
-            dependencies: ["ViewModelling"]),
+            name: "ViewModelingTests",
+            dependencies: ["ViewModeling"],
+            path: "Tests"
+        ),
     ]
 )

@@ -1,0 +1,32 @@
+{
+  "configurations" : [
+    {
+      "id" : "DF3923D8-ED84-4B50-BABC-D5B0C61BF5FE",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:",
+          "identifier" : "ViewModelling",
+          "name" : "ViewModelling"
+        }
+      ]
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "ViewModellingTests",
+        "name" : "ViewModellingTests"
+      }
+    }
+  ],
+  "version" : 1
+}

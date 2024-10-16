@@ -17,31 +17,27 @@ struct ViewModelTests {
         )
     }
 
-    @Test func send() {
-        viewModel.send(.action1)
+    @Test func send() async {
+        await viewModel._send(.action1)
         let stateToSet = SpyReducer.State(isHidden: false)
-        viewModel.send(.setState(stateToSet))
-        viewModel.send(.action3)
-        viewModel.send(.action2)
+        await viewModel._send(.setState(stateToSet))
+        await viewModel._send(.action3)
+        await viewModel._send(.action2)
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            let expectedActions: [SpyReducer.Action] = [.action1, .setState(stateToSet), .action3, .action2]
-            #expect(reducer.reduceBodyActionsReceived == expectedActions)
-            #expect(reducer.reduceBodyCallsCount == 3)
-        }
+        let expectedActions: [SpyReducer.Action] = [.action1, .setState(stateToSet), .action3, .action2]
+        #expect(reducer.reduceBodyActionsReceived == expectedActions)
+        #expect(reducer.reduceBodyCallsCount == 4)
     }
 
-    @Test func subscriptState() {
+    @Test func subscriptState() async {
         let state = SpyReducer.State(count: 17, isHidden: true)
-        viewModel.send(.setState(state))
+        await viewModel._send(.setState(state))
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            #expect(viewModel.count == 17)
-            #expect(viewModel.isHidden == true)
-        }
+        #expect(viewModel.count == 17)
+        #expect(viewModel.isHidden == true)
     }
 
-    @Test func returnEffect() {
+    @Test func returnEffect() async {
         reducer.reduceBodyReturnEffect = .concatenate(
             .send(.action1),
             .run { send in
@@ -50,13 +46,29 @@ struct ViewModelTests {
             .send(.action3)
         )
 
-        viewModel.send(.action2)
+        await viewModel._send(.action2)
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            let expectedActions: [SpyReducer.Action] = [.action2, .action1, .action1, .action3]
-            #expect(reducer.reduceBodyActionsReceived == expectedActions)
-            #expect(reducer.reduceBodyCallsCount == 4)
-        }
+        let expectedActions: [SpyReducer.Action] = [.action2, .action1, .action1, .action3]
+        #expect(reducer.reduceBodyActionsReceived == expectedActions)
+        #expect(reducer.reduceBodyCallsCount == 4)
+    }
+
+    @Test func bindingSetValue() async {
+        let binding = viewModel.binding(keyPath: \.count, send: SpyReducer.Action.setCount)
+        binding.wrappedValue = 7
+
+        try? await Task.sleep(nanoseconds: 1_000_000_000)
+        #expect(viewModel.count == 7)
+    }
+
+    @Test func bindingGetValue() {
+        let binding = viewModel.binding(keyPath: \.count, send: SpyReducer.Action.setCount)
+
+        let state = SpyReducer.State(count: 8)
+        viewModel.send(.setState(state))
+
+        print(binding.wrappedValue)
+        #expect(binding.wrappedValue == 8)
     }
 
 }

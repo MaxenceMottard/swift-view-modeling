@@ -10,7 +10,7 @@ import Foundation
 public struct Effect<Action> {
     public typealias Send = (Action) async -> Void
 
-    let work: (@escaping Send) async -> Void
+    private let work: (@escaping Send) async -> Void
 
     public init(work: @escaping (@escaping Send) async -> Void) {
         self.work = work

@@ -10,8 +10,8 @@ import SwiftUI
 @Observable
 @dynamicMemberLookup
 public class ViewModel<R: Reducer> {
-    private var state: R.State
-    private let reducer: R
+    var reducer: R
+    var state: R.State
 
     public init(reducer: () -> R, initialState state: R.State) {
         self.reducer = reducer()
@@ -24,12 +24,22 @@ public class ViewModel<R: Reducer> {
         }
     }
 
-    private func _send(_ action: R.Action) async {
+    func _send(_ action: R.Action) async {
         let effect = reducer.body(state: &state, action: action)
         await effect.run(send: _send)
     }
 
     public subscript<Value>(dynamicMember keyPath: KeyPath<R.State, Value>) -> Value {
         self.state[keyPath: keyPath]
+    }
+
+    public func binding<Value>(
+        keyPath: WritableKeyPath<R.State, Value>,
+        send actionToSend: @escaping (Value) -> R.Action
+    ) -> Binding<Value> {
+        Binding(
+            get: { self.state[keyPath: keyPath] },
+            set: { self.send(actionToSend($0)) }
+        )
     }
 }

@@ -18,6 +18,7 @@ class SpyReducer: Reducer {
         case action2
         case action3
         case setState(State)
+        case setCount(Int)
     }
 
     init() {}
@@ -34,10 +35,17 @@ class SpyReducer: Reducer {
                 state = newState
             }
 
+            if case let .setCount(newCount) = action {
+                state.count = newCount
+            }
+
             reduceBodyCallsCount += 1
             reduceBodyActionsReceived.append(action)
 
-            return reduceBodyReturnEffect ?? .none
+            let effect = reduceBodyReturnEffect ?? .none
+            reduceBodyReturnEffect = nil
+
+            return effect
         }
     }
 }

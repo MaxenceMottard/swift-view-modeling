@@ -13,7 +13,7 @@ struct ReduceTests {
         case action2
     }
 
-    @Test func reduce() async throws {
+    @Test func reduce() async {
         var receivedAction: TestAction!
         var runEffectClosureCallsCount = 0
 

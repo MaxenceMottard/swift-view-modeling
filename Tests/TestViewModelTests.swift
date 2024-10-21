@@ -28,10 +28,11 @@ struct TestViewModelTests {
                 switch action {
                 case .incrementCount:
                     state.count += 1
+                    state.isLoading = false
                     return .none
 
                 case .didAppear:
-                    state.isLoading = false
+                    state.isLoading = true
                     return .send(.incrementCount)
                 }
             }
@@ -49,43 +50,40 @@ struct TestViewModelTests {
     @Test func sendAndReceive() async {
         await viewModel.send(.didAppear)
 
-        viewModel.received(.didAppear) {
-            $0.isLoading = false
-        }
-        viewModel.received(.incrementCount) {
-            $0.count = 1
-            $0.isLoading = false
-        }
-    }
+        let didAppearAction = viewModel.popAction()
+        #expect(didAppearAction.action == .didAppear)
+        #expect(didAppearAction.state.isLoading == true)
 
+        let incrementCount = viewModel.popAction()
+        #expect(incrementCount.action == .incrementCount)
+        #expect(incrementCount.state.count == 1)
+        #expect(incrementCount.state.isLoading == false)
+    }
 
     @Test func sendAndReceiveInWrongOrder() async {
         await viewModel.send(.didAppear)
 
-        withKnownIssue {
-            viewModel.received(.incrementCount) {
-                $0.count = 1
-                $0.isLoading = false
-            }
-            viewModel.received(.didAppear) {
-                $0.isLoading = false
-            }
-        }
+        let incrementCount = viewModel.popAction()
+        #expect(incrementCount.action != .incrementCount)
+        #expect(incrementCount.state.count != 1)
+        #expect(incrementCount.state.isLoading != false)
+
+        let didAppearAction = viewModel.popAction()
+        #expect(didAppearAction.action != .didAppear)
+        #expect(didAppearAction.state.isLoading != true)
     }
 
-
-    @Test func sendAndReceiveWithWrongStatePropertiesValues() async {
+    @Test func sendAndReceiveInWrongOrderAndGoodStateChanges() async {
         await viewModel.send(.didAppear)
 
-        withKnownIssue {
-            viewModel.received(.didAppear) {
-                $0.isLoading = false
-            }
-            viewModel.received(.incrementCount) {
-                $0.count = 2
-                $0.isLoading = true
-            }
-        }
+        let incrementCount = viewModel.popAction()
+        #expect(incrementCount.action != .incrementCount)
+        #expect(incrementCount.state.isLoading == true)
+
+        let didAppearAction = viewModel.popAction()
+        #expect(didAppearAction.action != .didAppear)
+        #expect(didAppearAction.state.count == 1)
+        #expect(didAppearAction.state.isLoading == false)
     }
 
 }

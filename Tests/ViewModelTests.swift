@@ -61,11 +61,11 @@ struct ViewModelTests {
         #expect(viewModel.count == 7)
     }
 
-    @Test func bindingGetValue() {
+    @Test func bindingGetValue() async {
         let binding = viewModel.binding(keyPath: \.count, send: SpyReducer.Action.setCount)
 
         let state = SpyReducer.State(count: 8)
-        viewModel.send(.setState(state))
+        await viewModel._send(.setState(state))
 
         print(binding.wrappedValue)
         #expect(binding.wrappedValue == 8)

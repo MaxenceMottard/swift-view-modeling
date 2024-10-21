@@ -33,7 +33,7 @@ extension Effect {
     }
 
     public static func send(_ action: Action) -> Effect {
-        return Effect { send in
+        Effect { send in
             await send(action)
         }
     }
@@ -41,7 +41,7 @@ extension Effect {
     /// Concatenates a variadic list of effects together into a single effect, which runs the effects
     /// one after the other.
     public static func concatenate(_ effects: Effect...) -> Effect {
-        return Effect { send in
+        Effect { send in
             for effect in effects {
                 await effect.run(send: send)
             }
@@ -51,11 +51,15 @@ extension Effect {
     /// Merges a variadic list of effects together into a single effect, which runs the effects at the
     /// same time.
     public static func merge(_ effects: Effect...) -> Effect {
-        return Effect { send in
+        Effect { send in
             await withTaskGroup(of: Void.self) { group in
                 for effect in effects {
                     group.addTask {
-                        await effect.run(send: send)
+                        await effect.run { action in
+                            await Task {
+                                await send(action)
+                            }.value
+                        }
                     }
                 }
             }

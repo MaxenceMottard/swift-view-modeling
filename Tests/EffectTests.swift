@@ -1,4 +1,5 @@
 import Testing
+import Foundation
 @testable import ViewModeling
 
 @Suite("Effect")
@@ -95,7 +96,6 @@ struct EffectTests {
 
     @Test func mergeEffect() async {
         var receivedActions: [TestAction] = []
-        var runEffectSendClosureCallsCount = 0
 
         let effect = Effect<TestAction>.merge(
             .send(.action3),
@@ -108,12 +108,15 @@ struct EffectTests {
             .send(.action2)
         )
 
+        let queue = DispatchQueue(label: "actionsQueue")
+
         await effect.run { action in
-            runEffectSendClosureCallsCount += 1
-            receivedActions.append(action)
+            queue.sync {
+                receivedActions.append(action)
+            }
         }
 
-        #expect(runEffectSendClosureCallsCount == 6)
+        #expect(receivedActions.count == 6)
         #expect(receivedActions.filter({ $0 == .action1 }).count == 1)
         #expect(receivedActions.filter({ $0 == .action2 }).count == 3)
         #expect(receivedActions.filter({ $0 == .action3 }).count == 2)

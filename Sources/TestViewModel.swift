@@ -5,12 +5,7 @@
 //  Created by Maxence Mottard on 15/10/2024.
 //
 
-#if canImport(Testing)
-import Testing
-#endif
-#if canImport(XCTest)
-import XCTest
-#endif
+import Foundation
 
 public class TestViewModel<TestedReducer: Reducer>: ViewModel<TesterReducer<TestedReducer>> {
     private var actions = [ReceivedAction<TestedReducer>]()

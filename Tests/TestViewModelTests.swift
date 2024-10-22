@@ -86,4 +86,8 @@ struct TestViewModelTests {
         #expect(didAppearAction.state.isLoading == false)
     }
 
+    @Test func testAssignNewValueInState() async {
+        viewModel.count = 3
+        #expect(viewModel.state.count == 3)
+    }
 }

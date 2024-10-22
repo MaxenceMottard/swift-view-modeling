@@ -55,6 +55,11 @@ public class TestViewModel<TestedReducer: Reducer>: ViewModel<TesterReducer<Test
         public let action: Reducer.Action
         public let state: Reducer.State
     }
+
+    public subscript<Value>(dynamicMember keyPath: WritableKeyPath<TestedReducer.State, Value>) -> Value {
+        get { self.state[keyPath: keyPath] }
+        set { self.state[keyPath: keyPath] = newValue }
+    }
 }
 
 public struct TesterReducer<R: Reducer>: Reducer {

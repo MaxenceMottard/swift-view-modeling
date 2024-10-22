@@ -25,8 +25,9 @@ public class ViewModel<R: Reducer> {
     }
 
     func _send(_ action: R.Action) async {
-        let effect = reducer.body(state: &state, action: action)
-        await effect.run(send: _send)
+        await reducer
+            .body(state: &state, action: action)
+            .run(send: _send)
     }
 
     public subscript<Value>(dynamicMember keyPath: KeyPath<R.State, Value>) -> Value {
